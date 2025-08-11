@@ -148,4 +148,16 @@
     <!-- Tag context menu -->
     <string name="tag_context_menu_checkout_tag_commit">Checkout tag's commit</string>
     <string name="tag_context_menu_delete_tag">Delete tag</string>
+
+    <!-- Settings -->
+    <!-- Layout -->
+    <string name="settings_layout_branch_use_folder_title">Display nested branches</string>
+    <string name="settings_layout_branch_use_folder_description">If enabled, branches will be displayed collapsible (as folders)</string>
+    <string name="settings_layout_branch_type_title">Branch type</string>
+    <string name="settings_layout_branch_type_description">Which branch types should be affected by this layout</string>
+    <string name="settings_layout_branch_nesting_level_title">Nesting level</string>
+    <string name="settings_layout_branch_nesting_level_description">How many levels of nesting should be displayed</string>
+    <string name="settings_layout_branch_nest_delimiter_title">Nest delimiter</string>
+    <string name="settings_layout_branch_nest_delimiter_description">The delimiter to identify nesting in the branch name</string>
+
 </resources>

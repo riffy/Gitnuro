@@ -6,6 +6,7 @@ import com.jetpackduba.gitnuro.di.qualifiers.AppCoroutineScope
 import com.jetpackduba.gitnuro.logging.printError
 import com.jetpackduba.gitnuro.managers.Error
 import com.jetpackduba.gitnuro.managers.newErrorNow
+import com.jetpackduba.gitnuro.models.BranchLayout
 import com.jetpackduba.gitnuro.repositories.AppSettingsRepository
 import com.jetpackduba.gitnuro.system.OpenFilePickerUseCase
 import com.jetpackduba.gitnuro.system.PickerType
@@ -46,6 +47,7 @@ class SettingsViewModel @Inject constructor(
     val avatarProviderFlow = appSettingsRepository.avatarProviderTypeFlow
     val dateFormatFlow = appSettingsRepository.dateTimeFormatFlow
     val proxyFlow = appSettingsRepository.proxyFlow
+    val branchLayoutFlow = appSettingsRepository.branchLayoutFlow
 
     var scaleUi: Float
         get() = appSettingsRepository.scaleUi
@@ -165,6 +167,12 @@ class SettingsViewModel @Inject constructor(
         get() = appSettingsRepository.proxyHostPassword
         set(value) {
             appSettingsRepository.proxyHostPassword = value
+        }
+
+    var branchLayout: BranchLayout
+        get() = appSettingsRepository.branchLayout
+        set(value) {
+            appSettingsRepository.branchLayout = value
         }
 
     fun saveCustomTheme(filePath: String): Error? {

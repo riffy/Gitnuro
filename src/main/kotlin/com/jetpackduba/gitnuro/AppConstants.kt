@@ -1,5 +1,7 @@
 package com.jetpackduba.gitnuro
 
+import com.jetpackduba.gitnuro.models.BranchLayout
+import com.jetpackduba.gitnuro.models.BranchType
 import com.jetpackduba.gitnuro.models.DateTimeFormat
 import com.jetpackduba.gitnuro.preferences.AvatarProviderType
 
@@ -55,5 +57,12 @@ object SettingsDefaults {
         customFormat = "dd MMM yyyy",
         is24hours = true,
         useRelativeDate = true,
+    )
+
+    val defaultBranchLayout = BranchLayout(
+        useFolderDisplay = true,
+        branchType = BranchType.BOTH,
+        nestingLevel = 2,
+        nestDelimiter = "/"
     )
 }

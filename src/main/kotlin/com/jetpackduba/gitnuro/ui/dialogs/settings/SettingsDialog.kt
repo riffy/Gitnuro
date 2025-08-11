@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,6 +26,7 @@ import com.jetpackduba.gitnuro.extensions.handOnHover
 import com.jetpackduba.gitnuro.extensions.toSmartSystemString
 import com.jetpackduba.gitnuro.generated.resources.*
 import com.jetpackduba.gitnuro.managers.Error
+import com.jetpackduba.gitnuro.models.branchTypeLists
 import com.jetpackduba.gitnuro.preferences.AvatarProviderType
 import com.jetpackduba.gitnuro.repositories.DEFAULT_UI_SCALE
 import com.jetpackduba.gitnuro.theme.*
@@ -42,6 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import java.time.Instant
 
 sealed interface SettingsEntry {
@@ -410,6 +413,7 @@ private fun Branches(settingsViewModel: SettingsViewModel) {
 @Composable
 private fun Layout(settingsViewModel: SettingsViewModel) {
     val swapUncommittedChanges by settingsViewModel.swapUncommittedChangesFlow.collectAsState()
+    val branchLayout by settingsViewModel.branchLayoutFlow.collectAsState()
 
     SettingToggle(
         title = "Swap position for staged/unstaged views",
@@ -418,6 +422,46 @@ private fun Layout(settingsViewModel: SettingsViewModel) {
         onValueChanged = { value ->
             settingsViewModel.swapUncommittedChanges = value
         }
+    )
+
+    SettingToggle(
+        title = stringResource(Res.string.settings_layout_branch_use_folder_title),
+        subtitle = stringResource(Res.string.settings_layout_branch_use_folder_description),
+        value = branchLayout.useFolderDisplay,
+        onValueChanged = { value ->
+            settingsViewModel.branchLayout = branchLayout.copy(useFolderDisplay = value)
+        }
+    )
+
+    SettingDropDown(
+        title = stringResource(Res.string.settings_layout_branch_type_title),
+        subtitle = stringResource(Res.string.settings_layout_branch_type_description),
+        dropDownOptions = branchTypeLists,
+        currentOption = branchLayout.branchType,
+        onOptionSelected = { typeDropdown ->
+            settingsViewModel.branchLayout = branchLayout.copy(branchType = typeDropdown.value)
+        },
+        enabled = branchLayout.useFolderDisplay,
+    )
+
+    SettingIntInput(
+        title = stringResource(Res.string.settings_layout_branch_nesting_level_title),
+        subtitle = stringResource(Res.string.settings_layout_branch_nesting_level_description),
+        value = branchLayout.nestingLevel,
+        onValueChanged = { value ->
+            settingsViewModel.branchLayout = branchLayout.copy(nestingLevel = value)
+        },
+        enabled = branchLayout.useFolderDisplay,
+    )
+
+    SettingTextInput(
+        title = stringResource(Res.string.settings_layout_branch_nest_delimiter_title),
+        subtitle = stringResource(Res.string.settings_layout_branch_nest_delimiter_description),
+        value = branchLayout.nestDelimiter,
+        onValueChanged = { value ->
+            settingsViewModel.branchLayout = branchLayout.copy(nestDelimiter = value)
+        },
+        enabled = branchLayout.useFolderDisplay,
     )
 }
 
@@ -620,15 +664,17 @@ fun <T> SettingDropDown(
     dropDownOptions: List<DropDownOption<T>>,
     onOptionSelected: (DropDownOption<T>) -> Unit,
     currentOption: T,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = Modifier.padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FieldTitles(title, subtitle)
+        FieldTitles(title, subtitle, enabled)
 
         Spacer(modifier = Modifier.weight(1f))
 
+        // TODO: Apply the dropdown style properly when enabled = false (click animation)
         Box {
             DropDownMenu(
                 showIcons = false,
@@ -637,6 +683,7 @@ fun <T> SettingDropDown(
                         ContextMenuElement.ContextTextEntry(it.optionName, onClick = { onOptionSelected(it) })
                     }
                 },
+                enabled = enabled,
             ) {
                 Row(
                     modifier = Modifier.width(180.dp)

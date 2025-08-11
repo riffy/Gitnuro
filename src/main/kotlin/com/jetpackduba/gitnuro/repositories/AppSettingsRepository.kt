@@ -2,6 +2,8 @@ package com.jetpackduba.gitnuro.repositories
 
 import com.jetpackduba.gitnuro.SettingsDefaults
 import com.jetpackduba.gitnuro.extensions.defaultWindowPlacement
+import com.jetpackduba.gitnuro.models.BranchLayout
+import com.jetpackduba.gitnuro.models.BranchType
 import com.jetpackduba.gitnuro.models.DateTimeFormat
 import com.jetpackduba.gitnuro.preferences.AvatarProviderType
 import com.jetpackduba.gitnuro.preferences.WindowsPlacementPreference
@@ -52,6 +54,10 @@ private const val PREF_PROXY_PASSWORD = "proxyHostPassword"
 private const val PREF_CACHE_CREDENTIALS_IN_MEMORY = "credentialsInMemory"
 private const val PREF_FIRST_PANE_WIDTH = "firstPaneWidth"
 private const val PREF_THIRD_PANE_WIDTH = "thirdPaneWidth"
+private const val PREF_BRANCH_LAYOUT_USE_FOLDERS = "branchLayoutUseFolders"
+private const val PREF_BRANCH_LAYOUT_TYPES = "branchLayoutTypes"
+private const val PREF_BRANCH_LAYOUT_NESTING_LEVEL = "branchLayoutNestingLevel"
+private const val PREF_BRANCH_LAYOUT_DELIMITER = "branchLayoutDelimiter"
 
 private const val PREF_GIT_FF_MERGE = "gitFFMerge"
 private const val PREF_GIT_MERGE_AUTOSTASH = "mergeAutoStash"
@@ -122,6 +128,9 @@ class AppSettingsRepository @Inject constructor() {
 
     private val _dateTimeFormatFlow = MutableStateFlow(dateTimeFormat)
     val dateTimeFormatFlow = _dateTimeFormatFlow.asStateFlow()
+
+    private val _branchLayoutFlow = MutableStateFlow(branchLayout)
+    val branchLayoutFlow = _branchLayoutFlow.asStateFlow()
 
     private val _proxyFlow = MutableStateFlow(
         ProxySettings(
@@ -417,6 +426,29 @@ class AppSettingsRepository @Inject constructor() {
         set(value) {
             preferences.put(PREF_PROXY_PASSWORD, value)
             _proxyFlow.value = _proxyFlow.value.copy(hostPassword = value)
+        }
+
+    var branchLayout: BranchLayout
+        get() {
+            val default = SettingsDefaults.defaultBranchLayout
+
+            val useFolderDisplay = preferences.getBoolean(PREF_BRANCH_LAYOUT_USE_FOLDERS, default.useFolderDisplay)
+            // Fallback to default if the retrieved value is not BranchType compliant
+            val branchType = preferences
+                .get(PREF_BRANCH_LAYOUT_TYPES, default.branchType.name)
+                .let { saved -> runCatching { BranchType.valueOf(saved) }.getOrDefault(default.branchType) }
+            val nestingLevel = preferences.getInt(PREF_BRANCH_LAYOUT_NESTING_LEVEL, default.nestingLevel)
+            val nestDelimiter = preferences.get(PREF_BRANCH_LAYOUT_DELIMITER, default.nestDelimiter)
+
+            return BranchLayout(useFolderDisplay, branchType, nestingLevel, nestDelimiter)
+        }
+        set(newValue) {
+            preferences.putBoolean(PREF_BRANCH_LAYOUT_USE_FOLDERS, newValue.useFolderDisplay)
+            preferences.put(PREF_BRANCH_LAYOUT_TYPES, newValue.branchType.name)
+            preferences.putInt(PREF_BRANCH_LAYOUT_NESTING_LEVEL, newValue.nestingLevel)
+            preferences.put(PREF_BRANCH_LAYOUT_DELIMITER, newValue.nestDelimiter)
+
+            _branchLayoutFlow.value = newValue
         }
 
     fun saveCustomTheme(filePath: String) {
